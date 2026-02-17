@@ -47,15 +47,15 @@ export function AppSidebar() {
       )}
     >
       {/* Fixed Header — logo + collapse toggle */}
-      <div className="flex items-center justify-between p-4 border-b border-sidebar-border shrink-0">
+      <div className={cn(
+        "flex items-center p-4 border-b border-sidebar-border shrink-0",
+        collapsed ? "justify-center" : "justify-between"
+      )}>
         {!collapsed && (
           <div className="flex items-center gap-2">
             <img src={intelliBrainIcon} alt="IntelliBrain" className="w-8 h-8" />
             <span className="font-semibold text-sidebar-foreground">IntelliBrain</span>
           </div>
-        )}
-        {collapsed && (
-          <img src={intelliBrainIcon} alt="IntelliBrain" className="w-8 h-8 mx-auto" />
         )}
         <Button
           variant="ghost"
