@@ -8,7 +8,6 @@ import {
   ChevronLeft,
   Menu,
 } from "lucide-react";
-import intelliBrainIcon from "@/assets/intellibrain-icon.svg";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
