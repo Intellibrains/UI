@@ -42,7 +42,7 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        "flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300 h-full",
+        "flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300 h-screen",
         collapsed ? "w-16" : "w-64"
       )}
     >
@@ -68,7 +68,7 @@ export function AppSidebar() {
       </div>
 
       {/* Scrollable middle section */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto min-h-0">
         {/* User Profile */}
         <div className={cn("p-4 border-b border-sidebar-border", collapsed && "flex justify-center")}>
           <div className={cn("flex items-center gap-3", collapsed && "flex-col")}>
