@@ -5,7 +5,7 @@ import {
   Users,
   UserPlus,
   MessageSquareText,
-  ChevronDown,
+  ChevronRight,
   ExternalLink,
   CircleHelp,
   Loader2,
@@ -107,19 +107,21 @@ export function SettingsDropdown() {
       >
         <Settings className={cn("w-5 h-5 shrink-0", isOpen && "text-sidebar-primary")} />
         <span className="flex-1 text-left">Settings</span>
-        <ChevronDown className={cn("w-4 h-4 transition-transform", isOpen && "rotate-180")} />
+        <ChevronRight className={cn("w-4 h-4 transition-transform", isOpen && "rotate-90")} />
       </button>
 
       {isOpen && (
-        <div className="mt-1 ml-3 border-l-2 border-sidebar-border pl-3 space-y-0.5 animate-fade-in">
-          {options.map((opt) => (
-            <Dialog key={opt.id}>
-              <DialogTrigger asChild>
-                <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-sidebar-foreground rounded-lg hover:bg-sidebar-accent transition-colors">
-                  <opt.icon className="w-4 h-4" />
-                  {opt.label}
-                </button>
-              </DialogTrigger>
+        <div className="absolute left-full top-0 ml-2 w-48 bg-sidebar border border-sidebar-border rounded-lg shadow-lg z-50 animate-fade-in">
+          <div className="py-1">
+            {options.map((opt) => (
+              <Dialog key={opt.id}>
+                <DialogTrigger asChild>
+                  <button className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-sidebar-foreground hover:bg-sidebar-accent transition-colors">
+                    <opt.icon className="w-4 h-4 shrink-0" />
+                    <span className="flex-1 text-left">{opt.label}</span>
+                    <ChevronRight className="w-4 h-4 text-sidebar-foreground/40" />
+                  </button>
+                </DialogTrigger>
 
               {opt.id === "help" && (
                 <DialogContent>
@@ -276,8 +278,9 @@ export function SettingsDropdown() {
                   </div>
                 </DialogContent>
               )}
-            </Dialog>
-          ))}
+              </Dialog>
+            ))}
+          </div>
         </div>
       )}
     </div>
