@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   FileText,
@@ -30,8 +30,25 @@ const navigation = [
 
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const [activeMenu, setActiveMenu] = useState<"share" | "settings" | null>(null);
+  const [shareButtonRef, setShareButtonRef] = useState<HTMLElement | null>(null);
+  const [settingsButtonRef, setSettingsButtonRef] = useState<HTMLElement | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest("[data-menu-trigger]") && !target.closest("[data-menu-popup]")) {
+        setActiveMenu(null);
+      }
+    };
+
+    if (activeMenu) {
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
+    }
+  }, [activeMenu]);
 
   const handleLogout = () => {
     logout();
@@ -112,10 +129,32 @@ export function AppSidebar() {
           })}
 
           {/* Share dropdown */}
-          {!collapsed && <ShareDropdown />}
+          {!collapsed && (
+            <ShareDropdown
+              isOpen={activeMenu === "share"}
+              onOpen={() => {
+                setActiveMenu(activeMenu === "share" ? null : "share");
+              }}
+              onClose={() => setActiveMenu(null)}
+              buttonRef={shareButtonRef}
+              onButtonRef={setShareButtonRef}
+              sidebarWidth={collapsed ? 64 : 256}
+            />
+          )}
 
           {/* Settings dropdown */}
-          {!collapsed && <SettingsDropdown />}
+          {!collapsed && (
+            <SettingsDropdown
+              isOpen={activeMenu === "settings"}
+              onOpen={() => {
+                setActiveMenu(activeMenu === "settings" ? null : "settings");
+              }}
+              onClose={() => setActiveMenu(null)}
+              buttonRef={settingsButtonRef}
+              onButtonRef={setSettingsButtonRef}
+              sidebarWidth={collapsed ? 64 : 256}
+            />
+          )}
 
           {/* Upgrade Plan */}
           {collapsed ? (

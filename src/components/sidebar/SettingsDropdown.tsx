@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Settings,
   HelpCircle,
@@ -49,12 +49,28 @@ const options: SettingsOption[] = [
   { id: "faq", label: "FAQ", icon: CircleHelp },
 ];
 
-export function SettingsDropdown() {
-  const [isOpen, setIsOpen] = useState(false);
+interface SettingsDropdownProps {
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  buttonRef: HTMLElement | null;
+  onButtonRef: (ref: HTMLElement) => void;
+  sidebarWidth: number;
+}
+
+export function SettingsDropdown({
+  isOpen,
+  onOpen,
+  onClose,
+  buttonRef,
+  onButtonRef,
+  sidebarWidth,
+}: SettingsDropdownProps) {
   const [groupName, setGroupName] = useState("");
   const [inviteEmails, setInviteEmails] = useState("");
   const [feedbackText, setFeedbackText] = useState("");
   const [loading, setLoading] = useState<string | null>(null);
+  const buttonElementRef = useRef<HTMLButtonElement>(null);
 
   const handleCreateGroup = async () => {
     if (!groupName.trim()) return;
@@ -99,19 +115,33 @@ export function SettingsDropdown() {
     }
   };
 
+  const buttonRect = buttonRef?.getBoundingClientRect();
+
   return (
-    <div className="relative">
+    <>
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        ref={(el) => {
+          buttonElementRef.current = el || null;
+          if (el) onButtonRef(el);
+        }}
+        onClick={onOpen}
         className={cn("sidebar-item w-full", isOpen && "sidebar-item-active")}
+        data-menu-trigger
       >
         <Settings className={cn("w-5 h-5 shrink-0", isOpen && "text-sidebar-primary")} />
         <span className="flex-1 text-left">Settings</span>
         <ChevronRight className={cn("w-4 h-4 transition-transform", isOpen && "rotate-90")} />
       </button>
 
-      {isOpen && (
-        <div className="absolute left-full top-0 ml-2 w-48 bg-sidebar border border-sidebar-border rounded-lg shadow-lg z-50 animate-fade-in">
+      {isOpen && buttonRect && (
+        <div
+          className="fixed w-48 bg-sidebar border border-sidebar-border rounded-lg shadow-lg z-50 animate-fade-in"
+          style={{
+            left: `${sidebarWidth}px`,
+            top: `${buttonRect.top}px`,
+          }}
+          data-menu-popup
+        >
           <div className="py-1">
             {options.map((opt) => (
               <Dialog key={opt.id}>
@@ -123,166 +153,166 @@ export function SettingsDropdown() {
                   </button>
                 </DialogTrigger>
 
-              {opt.id === "help" && (
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                      <HelpCircle className="w-5 h-5 text-accent" />
-                      Help Center
-                    </DialogTitle>
-                    <DialogDescription>Get answers to common questions</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    {[
-                      { q: "How do I upload documents?", a: "Drag and drop files or click the upload area" },
-                      { q: "What formats are supported?", a: "PDF, DOCX, PPT for documents; MP4, MKV for videos" },
-                      { q: "How does the AI work?", a: "Our AI analyzes your content and answers questions based on it" },
-                    ].map((faq, i) => (
-                      <div key={i} className="p-3 bg-muted/50 rounded-lg">
-                        <p className="font-medium text-sm text-foreground">{faq.q}</p>
-                        <p className="text-sm text-muted-foreground mt-1">{faq.a}</p>
+                {opt.id === "help" && (
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <HelpCircle className="w-5 h-5 text-accent" />
+                        Help Center
+                      </DialogTitle>
+                      <DialogDescription>Get answers to common questions</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      {[
+                        { q: "How do I upload documents?", a: "Drag and drop files or click the upload area" },
+                        { q: "What formats are supported?", a: "PDF, DOCX, PPT for documents; MP4, MKV for videos" },
+                        { q: "How does the AI work?", a: "Our AI analyzes your content and answers questions based on it" },
+                      ].map((faq, i) => (
+                        <div key={i} className="p-3 bg-muted/50 rounded-lg">
+                          <p className="font-medium text-sm text-foreground">{faq.q}</p>
+                          <p className="text-sm text-muted-foreground mt-1">{faq.a}</p>
+                        </div>
+                      ))}
+                      <Button variant="outline" className="w-full">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Visit Full Documentation
+                      </Button>
+                    </div>
+                  </DialogContent>
+                )}
+
+                {opt.id === "group" && (
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <Users className="w-5 h-5 text-accent" />
+                        Create Study Group
+                      </DialogTitle>
+                      <DialogDescription>Start a new group to collaborate with friends</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Group Name</label>
+                        <Input
+                          placeholder="e.g., CS101 Study Group"
+                          value={groupName}
+                          onChange={(e) => setGroupName(e.target.value)}
+                        />
                       </div>
-                    ))}
-                    <Button variant="outline" className="w-full">
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Visit Full Documentation
-                    </Button>
-                  </div>
-                </DialogContent>
-              )}
-
-              {opt.id === "group" && (
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                      <Users className="w-5 h-5 text-accent" />
-                      Create Study Group
-                    </DialogTitle>
-                    <DialogDescription>Start a new group to collaborate with friends</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Group Name</label>
-                      <Input
-                        placeholder="e.g., CS101 Study Group"
-                        value={groupName}
-                        onChange={(e) => setGroupName(e.target.value)}
-                      />
                     </div>
-                  </div>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button
-                      className="bg-accent hover:bg-accent/90"
-                      disabled={loading === "group" || !groupName.trim()}
-                      onClick={handleCreateGroup}
-                    >
-                      {loading === "group" && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                      Create Group
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              )}
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                      </DialogClose>
+                      <Button
+                        className="bg-accent hover:bg-accent/90"
+                        disabled={loading === "group" || !groupName.trim()}
+                        onClick={handleCreateGroup}
+                      >
+                        {loading === "group" && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                        Create Group
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                )}
 
-              {opt.id === "invite" && (
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                      <UserPlus className="w-5 h-5 text-accent" />
-                      Invite Friends
-                    </DialogTitle>
-                    <DialogDescription>Enter email addresses to send invitations</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Email Addresses</label>
-                      <Textarea
-                        placeholder="Enter emails separated by commas..."
-                        value={inviteEmails}
-                        onChange={(e) => setInviteEmails(e.target.value)}
-                        rows={3}
-                      />
-                      <p className="text-xs text-muted-foreground">Separate multiple emails with commas</p>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button
-                      className="bg-accent hover:bg-accent/90"
-                      disabled={loading === "invite" || !inviteEmails.trim()}
-                      onClick={handleInvite}
-                    >
-                      {loading === "invite" && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                      Send Invites
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              )}
-
-              {opt.id === "feedback" && (
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                      <MessageSquareText className="w-5 h-5 text-accent" />
-                      Send Feedback
-                    </DialogTitle>
-                    <DialogDescription>Share your thoughts to help us improve</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Your Feedback</label>
-                      <Textarea
-                        placeholder="Tell us what you think..."
-                        value={feedbackText}
-                        onChange={(e) => setFeedbackText(e.target.value)}
-                        rows={4}
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button
-                      className="bg-accent hover:bg-accent/90"
-                      disabled={loading === "feedback" || !feedbackText.trim()}
-                      onClick={handleSendFeedback}
-                    >
-                      {loading === "feedback" && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                      Submit Feedback
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              )}
-
-              {opt.id === "faq" && (
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                      <CircleHelp className="w-5 h-5 text-accent" />
-                      Frequently Asked Questions
-                    </DialogTitle>
-                    <DialogDescription>Quick answers to common questions</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-3 py-4 max-h-80 overflow-y-auto">
-                    {faqItems.map((faq, i) => (
-                      <div key={i} className="p-3 bg-muted/50 rounded-lg">
-                        <p className="font-medium text-sm text-foreground">{faq.q}</p>
-                        <p className="text-sm text-muted-foreground mt-1">{faq.a}</p>
+                {opt.id === "invite" && (
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <UserPlus className="w-5 h-5 text-accent" />
+                        Invite Friends
+                      </DialogTitle>
+                      <DialogDescription>Enter email addresses to send invitations</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Email Addresses</label>
+                        <Textarea
+                          placeholder="Enter emails separated by commas..."
+                          value={inviteEmails}
+                          onChange={(e) => setInviteEmails(e.target.value)}
+                          rows={3}
+                        />
+                        <p className="text-xs text-muted-foreground">Separate multiple emails with commas</p>
                       </div>
-                    ))}
-                  </div>
-                </DialogContent>
-              )}
+                    </div>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                      </DialogClose>
+                      <Button
+                        className="bg-accent hover:bg-accent/90"
+                        disabled={loading === "invite" || !inviteEmails.trim()}
+                        onClick={handleInvite}
+                      >
+                        {loading === "invite" && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                        Send Invites
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                )}
+
+                {opt.id === "feedback" && (
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <MessageSquareText className="w-5 h-5 text-accent" />
+                        Send Feedback
+                      </DialogTitle>
+                      <DialogDescription>Share your thoughts to help us improve</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Your Feedback</label>
+                        <Textarea
+                          placeholder="Tell us what you think..."
+                          value={feedbackText}
+                          onChange={(e) => setFeedbackText(e.target.value)}
+                          rows={4}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                      </DialogClose>
+                      <Button
+                        className="bg-accent hover:bg-accent/90"
+                        disabled={loading === "feedback" || !feedbackText.trim()}
+                        onClick={handleSendFeedback}
+                      >
+                        {loading === "feedback" && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                        Submit Feedback
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                )}
+
+                {opt.id === "faq" && (
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <CircleHelp className="w-5 h-5 text-accent" />
+                        Frequently Asked Questions
+                      </DialogTitle>
+                      <DialogDescription>Quick answers to common questions</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-3 py-4 max-h-80 overflow-y-auto">
+                      {faqItems.map((faq, i) => (
+                        <div key={i} className="p-3 bg-muted/50 rounded-lg">
+                          <p className="font-medium text-sm text-foreground">{faq.q}</p>
+                          <p className="text-sm text-muted-foreground mt-1">{faq.a}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </DialogContent>
+                )}
               </Dialog>
             ))}
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
