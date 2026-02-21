@@ -150,11 +150,7 @@ export default function ChatWithVideos() {
 
       {/* Main Panel - Chat */}
       <div className="flex-1 flex flex-col bg-background mr-10">
-        <div className="p-4 border-b bg-card">
-          <p className="page-description">
-            Ask questions about your lecture videos and get AI-powered insights
-          </p>
-        </div>
+        <div className="p-4 border-b bg-card"></div>
 
         <ScrollArea className="flex-1 p-4">
           <div className="max-w-3xl mx-auto space-y-6">
@@ -170,7 +166,6 @@ export default function ChatWithVideos() {
         </ScrollArea>
 
         <div className="max-w-3xl mx-auto w-full space-y-2">
-          <AIDisclaimer />
           <ChatInput
             placeholder="Ask me anything from the video..."
             onSend={handleSendMessage}
@@ -178,6 +173,7 @@ export default function ChatWithVideos() {
             showShare
             onShare={handleShareChat}
           />
+          <AIDisclaimer />
         </div>
       </div>
 
