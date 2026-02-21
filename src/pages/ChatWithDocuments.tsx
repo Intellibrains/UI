@@ -152,11 +152,7 @@ export default function ChatWithDocuments() {
 
       {/* Main Panel - Chat */}
       <div className="flex-1 flex flex-col bg-background mr-10">
-        <div className="p-4 border-b bg-card">
-          <p className="page-description">
-            Ask questions about your uploaded documents and get AI-powered answers
-          </p>
-        </div>
+        <div className="p-4 border-b bg-card"></div>
 
         <ScrollArea className="flex-1 p-4">
           <div className="max-w-3xl mx-auto space-y-6">
@@ -172,7 +168,6 @@ export default function ChatWithDocuments() {
         </ScrollArea>
 
         <div className="max-w-3xl mx-auto w-full space-y-2">
-          <AIDisclaimer />
           <ChatInput
             placeholder="Ask me anything from the document..."
             onSend={handleSendMessage}
@@ -180,6 +175,7 @@ export default function ChatWithDocuments() {
             showShare
             onShare={handleShareChat}
           />
+          <AIDisclaimer />
         </div>
       </div>
 
