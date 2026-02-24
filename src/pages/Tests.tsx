@@ -180,7 +180,6 @@ export default function Tests() {
         <div className="p-4 border-b bg-card">
           <h1 className="page-title">Tests & Assessments</h1>
           <p className="page-description">AI-generated quizzes to test your understanding</p>
-          <AIDisclaimer className="mt-3" />
         </div>
 
         <ScrollArea className="flex-1 p-4">
@@ -293,6 +292,9 @@ export default function Tests() {
                 )}
               </div>
             )}
+            <div className="mt-6">
+              <AIDisclaimer />
+            </div>
           </div>
         </ScrollArea>
       </div>
