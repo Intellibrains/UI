@@ -1,9 +1,30 @@
-// API service — single entry point for all backend calls
-// Currently uses mock implementations; swap to real apiRequest() calls when FastAPI is ready
+import { apiRequest } from "./client";
 
+// 🔹 REAL Backend Register
+export async function register(req: { name: string; email: string; password: string }) {
+  return apiRequest("/signup", {
+    method: "POST",
+    body: JSON.stringify({
+      full_name: req.name,
+      email: req.email,
+      password: req.password,
+    }),
+  });
+}
+
+// 🔹 REAL Backend Login
+export async function login(req: { email: string; password: string }) {
+  return apiRequest("/signin", {
+    method: "POST",
+    body: JSON.stringify({
+      email: req.email,
+      password: req.password,
+    }),
+  });
+}
+
+// 🔹 KEEP ALL OTHER MOCK EXPORTS
 export {
-  mockLogin as login,
-  mockRegister as register,
   mockLogout as logout,
   mockGetCurrentUser as getCurrentUser,
   mockGetConversations as getConversations,

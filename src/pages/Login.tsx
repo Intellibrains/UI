@@ -9,6 +9,14 @@ import { toast } from "@/hooks/use-toast";
 import { login, register, setAuthToken } from "@/services/api";
 import intelliBrainIcon from "@/assets/intellibrain-icon.svg";
 
+type AuthResponse = {
+  user: {
+    name: string;
+    email: string;
+  };
+  token: string;
+};
+
 export default function Login() {
   const navigate = useNavigate();
   const [isRegister, setIsRegister] = useState(false);
@@ -21,15 +29,33 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    
     try {
-      const response = isRegister
+      const response = (isRegister
         ? await register({ name, email, password })
-        : await login({ email, password });
+        : await login({ email, password })) as AuthResponse;
+    
       setAuthToken(response.token);
-      toast({ title: isRegister ? "Account created!" : "Welcome back!", description: `Signed in as ${response.user.email}` });
+    
+      // Save user data
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("name", response.user.name);
+      localStorage.setItem("email", response.user.email);
+    
+      toast({
+        title: isRegister ? "Account created!" : "Welcome back!",
+        description: `Signed in as ${response.user.email}`,
+      });
+    
       navigate("/documents");
+    
     } catch (err) {
-      toast({ title: "Error", description: err instanceof Error ? err.message : "Authentication failed", variant: "destructive" });
+      toast({
+        title: "Error",
+        description:
+          err instanceof Error ? err.message : "Authentication failed",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }

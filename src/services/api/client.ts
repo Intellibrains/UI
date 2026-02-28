@@ -1,6 +1,7 @@
-// Base API client — swap BASE_URL to your FastAPI server when ready
+// Base API client — connected to FastAPI backend
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
+// 👉 IMPORTANT: This is your FastAPI local server URL
+const BASE_URL = "";
 
 let authToken: string | null = localStorage.getItem("auth_token");
 
