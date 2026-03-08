@@ -36,6 +36,11 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Get user info from localStorage
+const name = localStorage.getItem("name") || "User";
+const email = localStorage.getItem("email") || "user@email.com";
+const avatarLetter = name.charAt(0).toUpperCase();
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -89,16 +94,18 @@ export function AppSidebar() {
         {/* User Profile */}
         <div className={cn("p-4 border-b border-sidebar-border", collapsed && "flex justify-center")}>
           <div className={cn("flex items-center gap-3", collapsed && "flex-col")}>
-            <Avatar className="h-10 w-10 border-2 border-sidebar-accent">
-              <AvatarImage src="/placeholder.svg" alt="Student" />
-              <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground">JS</AvatarFallback>
-            </Avatar>
-            {!collapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-sidebar-foreground truncate">John Student</p>
-                <p className="text-xs text-sidebar-foreground/60 truncate">john@university.edu</p>
-              </div>
-            )}
+          <Avatar className="h-10 w-10 border-2 border-sidebar-accent">
+  <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground">
+    {avatarLetter}
+  </AvatarFallback>
+</Avatar>
+
+{!collapsed && (
+  <div className="flex-1 min-w-0">
+    <p className="text-sm font-medium text-sidebar-foreground truncate">{name}</p>
+    <p className="text-xs text-sidebar-foreground/60 truncate">{email}</p>
+  </div>
+)}
           </div>
         </div>
 

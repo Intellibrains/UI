@@ -1,7 +1,7 @@
 // Base API client — connected to FastAPI backend
 
-// 👉 IMPORTANT: This is your FastAPI local server URL
-const BASE_URL = "";
+// 👉 FastAPI backend URL
+const BASE_URL = "http://127.0.0.1:8000";
 
 let authToken: string | null = localStorage.getItem("auth_token");
 
@@ -42,4 +42,37 @@ export async function apiRequest<T>(
   }
 
   return response.json();
+}
+
+/* ===============================
+    Chat API functions
+================================ */
+
+// 1. Updated: Send both username AND roomName to the backend
+export async function createRoom(username: string, roomName: string) {
+  return apiRequest<{ room_code: string; room_name: string }>("/chat/create-room", {
+    method: "POST",
+    body: JSON.stringify({ 
+      username, 
+      room_name: roomName // Added this line
+    }),
+  });
+}
+
+// 2. Updated: Request room_name in the return type so TypeScript is happy
+export async function joinRoom(roomCode: string, username: string) {
+  return apiRequest<{ room_code: string; room_name: string }>("/chat/join-room", {
+    method: "POST",
+    body: JSON.stringify({
+      room_code: roomCode,
+      username: username 
+    })
+  });
+}
+
+// 3. This remains the same
+export async function getTwilioToken(username: string) {
+  return apiRequest<{ token: string }>(`/chat/twilio-token/${username}`, {
+    method: "GET",
+  });
 }
