@@ -1,7 +1,7 @@
 // Base API client — connected to FastAPI backend
 
 // 👉 FastAPI backend URL
-const BASE_URL = "";
+const BASE_URL =  "http://127.0.0.1:8000";
 
 let authToken: string | null = localStorage.getItem("auth_token");
 

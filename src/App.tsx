@@ -4,11 +4,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { FriendsChatPanel } from "@/components/panels/FriendsChatPanel";
 import Login from "./pages/Login";
 import ChatWithDocuments from "./pages/ChatWithDocuments";
 import ChatWithVideos from "./pages/ChatWithVideos";
 import Tests from "./pages/Tests";
-
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -19,17 +19,23 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+
+        {/* Chat stays mounted across all routes */}
+        <FriendsChatPanel />
+
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
+
           <Route element={<DashboardLayout />}>
             <Route path="/documents" element={<ChatWithDocuments />} />
             <Route path="/videos" element={<ChatWithVideos />} />
             <Route path="/tests" element={<Tests />} />
-            
           </Route>
+
           <Route path="*" element={<NotFound />} />
         </Routes>
+
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

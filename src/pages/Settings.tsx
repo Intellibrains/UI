@@ -29,7 +29,7 @@ const settingsItems: SettingsItem[] = [
   {
     id: "help",
     title: "Help",
-    description: "Get help with using IntelliBrain",
+    description: "Get help with using FlowIntellect",
     icon: HelpCircle,
     action: "dialog",
     dialogType: "help",
@@ -53,7 +53,7 @@ const settingsItems: SettingsItem[] = [
   {
     id: "feedback",
     title: "Send Feedback",
-    description: "Help us improve IntelliBrain",
+    description: "Help us improve FlowIntellect",
     icon: MessageSquareText,
     action: "dialog",
     dialogType: "feedback",
@@ -83,7 +83,7 @@ export default function Settings() {
                 Options
               </CardTitle>
               <CardDescription>
-                Customize your IntelliBrain experience
+                Customize your FlowIntellect experience
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
@@ -253,7 +253,7 @@ export default function Settings() {
 
           {/* App Info */}
           <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>IntelliBrain v1.0.0</p>
+            <p>FlowIntellect v1.0.0</p>
             <p className="mt-1">Made with ❤️ for students</p>
           </div>
         </div>

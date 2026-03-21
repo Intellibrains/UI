@@ -25,8 +25,64 @@ export function FriendsChatPanel({ className }: { className?: string }) {
   const [messages, setMessages] = useState<any[]>([]);
   const [conversation, setConversation] = useState<any>(null);
   const [copied, setCopied] = useState(false);
-  
+  const [roomHistory, setRoomHistory] = useState<any[]>([]);
+  const [historyJoiningCode, setHistoryJoiningCode] = useState<string | null>(null);
+  const [twilioClient, setTwilioClient] = useState<Client | null>(null);
+
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("chat_rooms");
+    if (stored) {
+      setRoomHistory(JSON.parse(stored));
+    }
+  }, []);
+
+  useEffect(() => {
+    const initTwilio = async () => {
+      try {
+        const username = localStorage.getItem("name") || "guest";
+
+        const tokenData = await getTwilioToken(username);
+        const client = new Client(tokenData.token);
+
+        setTwilioClient(client);
+      } catch (err) {
+        console.error("Twilio init error", err);
+      }
+    };
+
+    initTwilio();
+  }, []);
+
+  useEffect(() => {
+    const lastRoom = localStorage.getItem("last_chat_room");
+    if (!lastRoom) return;
+
+    const room = JSON.parse(lastRoom);
+    if (!room?.code) return;
+
+    const reconnect = async () => {
+      try {
+        const username = localStorage.getItem("name") || "guest";
+
+        const tokenData = await getTwilioToken(username);
+        const client = new Client(tokenData.token);
+
+        const conv = await client.getConversationByUniqueName(room.code);
+        await setupConversation(conv, username);
+
+        setCurrentRoomName(room.name);
+        setCurrentRoomCode(room.code);
+        setPanelState("chat");
+
+      } catch (err) {
+        console.error("Reconnect failed", err);
+      }
+    };
+
+    reconnect();
+  }, []);
 
   // Smooth scroll to bottom on new messages
   useEffect(() => {
@@ -43,10 +99,26 @@ export function FriendsChatPanel({ className }: { className?: string }) {
     return (author || "").toLowerCase().trim() === me.toLowerCase().trim();
   };
 
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText(generatedCode || currentRoomCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopyCode = async () => {
+    try {
+      const text = generatedCode || currentRoomCode;
+
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Copy failed:", err);
+    }
   };
 
   const setupConversation = async (conv: any, username: string) => {
@@ -85,39 +157,75 @@ export function FriendsChatPanel({ className }: { className?: string }) {
       const username = localStorage.getItem("name") || "guest";
       const data = await createRoom(username, roomName);
       setGeneratedCode(data.room_code);
-      
-      const tokenData = await getTwilioToken(username);
-      const client = await Client.create(tokenData.token);
-      const conv = await client.getConversationByUniqueName(data.room_code);
+
+      if (!twilioClient) return;
+
+      const conv = await twilioClient.getConversationByUniqueName(data.room_code);
       await setupConversation(conv, username);
-      
+
       setCurrentRoomName(roomName);
       setCurrentRoomCode(data.room_code);
+
+      const newRoom = { name: roomName, code: data.room_code };
+
+      const updatedHistory = [newRoom, ...roomHistory.filter(r => r.code !== data.room_code)].slice(0, 5);
+
+      setRoomHistory(prev => {
+        const filtered = prev.filter(r => r.code !== data.room_code);
+        const updated = [{ name: roomName, code: data.room_code }, ...filtered].slice(0,5);
+      
+        localStorage.setItem("chat_rooms", JSON.stringify(updated));
+      
+        return updated;
+      });
+
+      localStorage.setItem(
+        "last_chat_room",
+        JSON.stringify({ name: roomName, code: data.room_code })
+      );
+
       setPanelState("chat");
     } catch (e) { console.error(e); } finally { setIsGeneratingCode(false); }
   };
 
-  const handleJoinRoom = async () => {
+  const handleJoinRoom = async (roomCode?: string) => {
     try {
       setIsJoining(true);
       const username = localStorage.getItem("name") || "user_" + Math.random().toString(36).slice(2, 5);
-      
+
       // Fix: cast to any to bypass the TypeScript property error
-      const joinData: any = await joinRoom(joinCode, username);
-      
-      const tokenData = await getTwilioToken(username);
-      const client = await Client.create(tokenData.token);
-      const conv = await client.getConversationByUniqueName(joinCode);
+      const codeToJoin = roomCode || joinCode;
+
+      const joinData: any = await joinRoom(codeToJoin, username);
+      if (!twilioClient) return;
+
+      const conv = await twilioClient.getConversationByUniqueName(codeToJoin);
       await setupConversation(conv, username);
 
       // Fix: Dynamically set the room name from response
-      setCurrentRoomName(joinData?.room_name || `Room ${joinCode}`);
-      setCurrentRoomCode(joinCode);
+      const roomName = joinData?.room_name || `Room ${codeToJoin}`;
+
+      setCurrentRoomName(roomName);
+      setCurrentRoomCode(codeToJoin);
+      setRoomHistory(prev => {
+        const filtered = prev.filter(r => r.code !== codeToJoin);
+        const updated = [{ name: roomName, code: codeToJoin }, ...filtered].slice(0,5);
+      
+        localStorage.setItem("chat_rooms", JSON.stringify(updated));
+      
+        return updated;
+      });
+
+      localStorage.setItem(
+        "last_chat_room",
+        JSON.stringify({ name: roomName, code: joinCode })
+      );
+
       setPanelState("chat");
-    } catch (e) { 
-      setJoinError("Invalid Code"); 
-    } finally { 
-      setIsJoining(false); 
+    } catch (e) {
+      setJoinError("Invalid Code");
+    } finally {
+      setIsJoining(false);
     }
   };
 
@@ -145,7 +253,7 @@ export function FriendsChatPanel({ className }: { className?: string }) {
       )}>
         <AnimatePresence mode="wait">
           {panelState === "initial" && (
-            <motion.div 
+            <motion.div
               key="initial"
               initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
               className="flex-1 flex flex-col p-6 space-y-6"
@@ -164,6 +272,37 @@ export function FriendsChatPanel({ className }: { className?: string }) {
                   <LogIn className="w-5 h-5" /> <span className="font-semibold">Join via Code</span>
                 </Button>
               </div>
+              {/* Recent Rooms */}
+              {roomHistory.length > 0 && (
+                <div className="pt-4">
+                  <p className="text-xs text-muted-foreground mb-2">Recent Rooms</p>
+
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+
+                    {roomHistory.map((room) => (
+                      <div
+                        key={room.code}
+                        onClick={async () => {
+                          setHistoryJoiningCode(room.code);
+
+
+                          await handleJoinRoom(room.code);
+
+                          setHistoryJoiningCode(null);
+                        }}
+                        className="flex justify-between items-center px-3 py-2 bg-muted/40 rounded-lg cursor-pointer hover:bg-muted"
+                      >
+                        <span className="text-sm font-medium">{room.name}</span>
+                        {historyJoiningCode === room.code ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                        ) : (
+                          <span className="text-xs font-mono text-primary">#{room.code}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -176,9 +315,19 @@ export function FriendsChatPanel({ className }: { className?: string }) {
                   </div>
                   <div className="min-w-0">
                     <p className="font-bold text-sm truncate leading-tight">{currentRoomName}</p>
-                    <div className="flex items-center gap-1 cursor-pointer" onClick={handleCopyCode}>
-                      <span className="text-[10px] text-muted-foreground font-mono">#{currentRoomCode}</span>
-                      {copied ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3 text-muted-foreground" />}
+                    <div
+                      onClick={handleCopyCode}
+                      className="flex items-center gap-2 cursor-pointer bg-muted/40 px-3 py-1.5 rounded-lg hover:bg-muted transition"
+                    >
+                      <span className="text-sm font-mono font-semibold tracking-wider text-primary">
+                        #{currentRoomCode}
+                      </span>
+
+                      {copied ? (
+                        <Check className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <Copy className="w-4 h-4 text-muted-foreground" />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -196,8 +345,8 @@ export function FriendsChatPanel({ className }: { className?: string }) {
                       )}
                       <div className={cn(
                         "px-4 py-2 rounded-2xl text-sm max-w-[85%] shadow-sm",
-                        msg.isMe 
-                          ? "bg-slate-800 text-white rounded-tr-none" 
+                        msg.isMe
+                          ? "bg-slate-800 text-white rounded-tr-none"
                           : "bg-slate-100 text-slate-900 rounded-tl-none border"
                       )}>
                         {msg.message}
@@ -210,7 +359,7 @@ export function FriendsChatPanel({ className }: { className?: string }) {
 
               <div className="p-4 border-t bg-card shrink-0">
                 <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-2xl border">
-                  <Input 
+                  <Input
                     value={message} onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
                     placeholder="Type message..."
@@ -224,23 +373,23 @@ export function FriendsChatPanel({ className }: { className?: string }) {
             </motion.div>
           )}
         </AnimatePresence>
-        
+
         {/* Simple Create/Join inputs logic */}
         {(panelState === "createRoom" || panelState === "joinRoom") && (
           <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 space-y-4">
-             <h2 className="font-bold text-lg">{panelState === "createRoom" ? "New Room" : "Join Friend"}</h2>
-             <Input 
-               placeholder={panelState === "createRoom" ? "Room Name" : "6-digit code"} 
-               value={panelState === "createRoom" ? roomName : joinCode}
-               onChange={(e) => panelState === "createRoom" ? setRoomName(e.target.value) : setJoinCode(e.target.value.toUpperCase())}
-             />
-             <Button 
-                onClick={panelState === "createRoom" ? handleCreateRoom : handleJoinRoom} 
-                className="w-full" disabled={isGeneratingCode || isJoining}
-             >
-               {(isGeneratingCode || isJoining) ? <Loader2 className="animate-spin" /> : "Continue"}
-             </Button>
-             <Button variant="ghost" onClick={() => setPanelState("initial")} className="w-full">Back</Button>
+            <h2 className="font-bold text-lg">{panelState === "createRoom" ? "New Room" : "Join Friend"}</h2>
+            <Input
+              placeholder={panelState === "createRoom" ? "Room Name" : "6-digit code"}
+              value={panelState === "createRoom" ? roomName : joinCode}
+              onChange={(e) => panelState === "createRoom" ? setRoomName(e.target.value) : setJoinCode(e.target.value.toUpperCase())}
+            />
+            <Button
+              onClick={panelState === "createRoom" ? handleCreateRoom : () => handleJoinRoom(joinCode)}
+              className="w-full" disabled={isGeneratingCode || isJoining}
+            >
+              {(isGeneratingCode || isJoining) ? <Loader2 className="animate-spin" /> : "Continue"}
+            </Button>
+            <Button variant="ghost" onClick={() => setPanelState("initial")} className="w-full">Back</Button>
           </motion.div>
         )}
       </div>

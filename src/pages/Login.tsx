@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { login, register, setAuthToken } from "@/services/api";
-import intelliBrainIcon from "@/assets/intellibrain-icon.svg";
+import flowIntellectIcon from "@/assets/flowintellect-icon.png";
 
 type AuthResponse = {
   user: {
@@ -72,8 +72,8 @@ export default function Login() {
       <div className="hidden lg:flex lg:w-1/2 bg-primary relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-accent/30" />
         <div className="relative z-10 flex flex-col justify-center items-center w-full p-12 text-primary-foreground">
-          <img src={intelliBrainIcon} alt="IntelliBrain" className="w-20 h-20 mb-8 brightness-0 invert" />
-          <h1 className="text-4xl font-bold mb-4 text-center">IntelliBrain</h1>
+          <img src={flowIntellectIcon} alt="FlowIntellect" className="w-24 h-24 mb-8 object-contain" />
+          <h1 className="text-4xl font-bold mb-4 text-center">FlowIntellect</h1>
           <p className="text-lg text-primary-foreground/80 text-center max-w-md">
             Your intelligent learning companion. Upload documents, watch videos, 
             and test your knowledge with AI-powered insights.
@@ -110,8 +110,8 @@ export default function Login() {
           {/* Mobile Logo */}
            <div className="lg:hidden flex justify-center mb-8">
              <div className="flex items-center gap-3">
-               <img src={intelliBrainIcon} alt="IntelliBrain" className="w-12 h-12" />
-               <span className="text-2xl font-bold text-foreground">IntelliBrain</span>
+               <img src={flowIntellectIcon} alt="FlowIntellect" className="w-12 h-12 object-contain" />
+               <span className="text-2xl font-bold text-foreground">FlowIntellect</span>
              </div>
            </div>
 

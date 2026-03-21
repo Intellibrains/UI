@@ -8,7 +8,7 @@ import {
   ChevronLeft,
   Menu,
 } from "lucide-react";
-import intelliBrainIcon from "@/assets/intellibrain-icon.svg";
+import flowIntellectIcon from "@/assets/flowintellect-icon.png";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -75,8 +75,8 @@ const avatarLetter = name.charAt(0).toUpperCase();
       )}>
         {!collapsed && (
           <div className="flex items-center gap-2">
-            <img src={intelliBrainIcon} alt="IntelliBrain" className="w-8 h-8" />
-            <span className="font-semibold text-sidebar-foreground">IntelliBrain</span>
+            <img src={flowIntellectIcon} alt="FlowIntellect" className="w-8 h-8" />
+            <span className="font-semibold text-sidebar-foreground">FlowIntellect</span>
           </div>
         )}
         <Button

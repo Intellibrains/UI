@@ -1,4 +1,4 @@
-// Shared API types for IntelliBrain backend integration
+// Shared API types for flowIntellect backend integration
 // These types mirror expected REST API request/response shapes
 
 export interface User {

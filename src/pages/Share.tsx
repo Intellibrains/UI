@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 export default function Share() {
   const [copied, setCopied] = useState(false);
-  const shareUrl = "https://intellibrain.app/invite/abc123";
+  const shareUrl = "https:/FlowIntellect/.app/invite/abc123";
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareUrl);
@@ -20,19 +20,19 @@ export default function Share() {
       name: "Email",
       icon: Mail,
       color: "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20",
-      action: () => window.open(`mailto:?subject=Check out IntelliBrain&body=I've been using IntelliBrain to study smarter. Join me! ${shareUrl}`),
+      action: () => window.open(`mailto:?subject=Check out FlowIntellect&body=I've been using FlowIntellect to study smarter. Join me! ${shareUrl}`),
     },
     {
       name: "WhatsApp",
       icon: MessageCircle,
       color: "bg-green-500/10 text-green-600 hover:bg-green-500/20",
-      action: () => window.open(`https://wa.me/?text=Check out IntelliBrain! ${shareUrl}`),
+      action: () => window.open(`https://wa.me/?text=Check out FlowIntellect ! ${shareUrl}`),
     },
     {
       name: "Twitter",
       icon: Twitter,
       color: "bg-sky-500/10 text-sky-600 hover:bg-sky-500/20",
-      action: () => window.open(`https://twitter.com/intent/tweet?text=Check out IntelliBrain!&url=${shareUrl}`),
+      action: () => window.open(`https://twitter.com/intent/tweet?text=Check out FlowIntellect!&url=${shareUrl}`),
     },
     {
       name: "Facebook",
@@ -51,7 +51,7 @@ export default function Share() {
   return (
     <div className="flex-1 flex flex-col bg-background">
       <div className="p-4 border-b bg-card">
-        <h1 className="page-title">Share IntelliBrain</h1>
+        <h1 className="page-title">Share FlowIntellect</h1>
         <p className="page-description">
           Invite friends and study together
         </p>
